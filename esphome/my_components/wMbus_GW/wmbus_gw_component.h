@@ -40,7 +40,6 @@ class WmBusGWComponent : public Component {
         if (client.connect(CLIENT_HEX_IP, CLIENT_HEX_PORT)) {
           client.write((const uint8_t *) MBpacket, lenWithoutCrc);
           client.stop();
-          esp_task_wdt_reset();
         }
         // rtlwmbus format
         if (client.connect(CLIENT_RTLWMBUS_IP, CLIENT_RTLWMBUS_PORT)) {
@@ -53,7 +52,6 @@ class WmBusGWComponent : public Component {
           }
           client.print("\n");
           client.stop();
-          esp_task_wdt_reset();
         }
         memset(MBpacket, 0, sizeof(MBpacket));
       }
