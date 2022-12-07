@@ -1,0 +1,55 @@
+substitutions:
+  system_name: wmbus
+  friendly_name: wmBus
+  device_description: "Bramka wmBus"
+
+packages:
+  board: !include boards/esp32-poe.yaml
+  binary_sensor: !include components/common/status.yaml
+  text_sensor: !include components/common/version.yaml
+
+switch:
+  platform: restart
+  id: switch_restart
+  name: "ESPH ${friendly_name} Restart"
+
+api:
+  password: !secret api_password
+  reboot_timeout: 10min
+
+ota:
+  password: !secret ota_password
+  safe_mode: true
+
+logger:
+  id: component_logger
+  level: NONE
+  baud_rate: 0
+
+time:
+  - platform: sntp
+    id: time_sntp
+    servers:
+    - 10.0.0.1
+
+esphome:
+  includes:
+    - my_components/wMbus_GW/
+  libraries:
+    - SPI
+    - "SmartRC-CC1101-Driver-Lib"
+    - wMbus-lib=https://github.com/SzczepanLeon/wMbus-lib
+
+esp32_ble_tracker:
+  scan_parameters:
+    active: true
+
+bluetooth_proxy:
+  active: true
+
+custom_component:
+- lambda: |-
+    auto my_custom = new WmBusGWComponent();
+    return {my_custom};
+  components:
+  - id: my_custom_id

@@ -1,0 +1,14 @@
+# ESP32-POE by Olimex
+#
+esphome:
+  <<: !include .esphome.yaml
+  platform: ESP32
+  board: esp32-poe
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO17_OUT
+  power_pin: GPIO12
+  phy_addr: 0
