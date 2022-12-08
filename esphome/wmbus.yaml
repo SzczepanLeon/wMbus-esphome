@@ -36,9 +36,7 @@ esphome:
   includes:
     - my_components/wMbus_GW/
   libraries:
-    - SPI
-    - "SmartRC-CC1101-Driver-Lib"
-    - wMbus-lib=https://github.com/SzczepanLeon/wMbus-lib
+    - wMbus-lib=https://github.com/SzczepanLeon/wMbus-lib@0.9.6
 
 esp32_ble_tracker:
   scan_parameters:
