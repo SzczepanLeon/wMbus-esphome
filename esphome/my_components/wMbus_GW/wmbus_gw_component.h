@@ -20,6 +20,7 @@ class WmBusGWComponent : public Component {
       rf_mbus_init(SPI_SCK, SPI_MISO, SPI_MOSI, SPI_SS, GDO0, GDO2);
 
       restartInfo = false;
+      this->last_connected_ = millis();
     }
 
     void loop() override {
@@ -33,6 +34,11 @@ class WmBusGWComponent : public Component {
         }
       }
 
+      if ((millis() - this->last_connected_) > 180000) {
+        ESP_LOGE(TAG, "Can't send to wmbusmeters... Restarting...");
+        App.reboot();
+      }
+
       if (rf_mbus_task(MBpacket, rssi, GDO0, GDO2)) {
         uint8_t lenWithoutCrc = crcRemove(MBpacket, packetSize(MBpacket[0]));
         ESP_LOGD("wmBus GW", "T: %s", format_hex_pretty(MBpacket, lenWithoutCrc).c_str());
@@ -40,18 +46,7 @@ class WmBusGWComponent : public Component {
         if (client.connect(CLIENT_HEX_IP, CLIENT_HEX_PORT)) {
           client.write((const uint8_t *) MBpacket, lenWithoutCrc);
           client.stop();
-        }
-        // rtlwmbus format
-        if (client.connect(CLIENT_RTLWMBUS_IP, CLIENT_RTLWMBUS_PORT)) {
-          time_t currTime = id(time_sntp).now().timestamp;
-          // T1;1;1;2020-07-19 05:28:57.000;46;95;43410778;0x1944
-          strftime(telegramTime, sizeof(telegramTime), "%Y-%m-%d %H:%M:%S.000", localtime(&currTime));
-          client.printf("T1;1;1;%s;%d;;;0x", telegramTime, rssi);
-          for (int i = 0; i < lenWithoutCrc; i++){
-            client.printf("%02X", MBpacket[i]);
-          }
-          client.print("\n");
-          client.stop();
+          this->last_connected_ = millis();
         }
         memset(MBpacket, 0, sizeof(MBpacket));
       }
@@ -63,4 +58,5 @@ class WmBusGWComponent : public Component {
     char telegramTime[24];
     int rssi = 0;
     bool restartInfo = false;
+    uint32_t last_connected_{0};
 };
