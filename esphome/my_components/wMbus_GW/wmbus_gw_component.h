@@ -7,6 +7,8 @@
 #include "mbus_packet.hpp"
 #include "utils.hpp"
 
+#define TAG "wmBus GW"
+
 class WmBusGWComponent : public Component {
   protected:
     HighFrequencyLoopRequester high_freq_;
@@ -41,7 +43,7 @@ class WmBusGWComponent : public Component {
 
       if (rf_mbus_task(MBpacket, rssi, GDO0, GDO2)) {
         uint8_t lenWithoutCrc = crcRemove(MBpacket, packetSize(MBpacket[0]));
-        ESP_LOGD("wmBus GW", "T: %s", format_hex_pretty(MBpacket, lenWithoutCrc).c_str());
+        ESP_LOGD(TAG, "T: %s", format_hex_pretty(MBpacket, lenWithoutCrc).c_str());
         // hex format
         if (client.connect(CLIENT_HEX_IP, CLIENT_HEX_PORT)) {
           client.write((const uint8_t *) MBpacket, lenWithoutCrc);
